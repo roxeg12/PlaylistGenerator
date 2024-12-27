@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="PlaylistGenerator"/>
+    <title>PlaylistGenerator</title>
+    <link rel="stylesheet" href="../css/styles.css"/>
+    <script defer type="module" src="../src/main.ts"></script>
+</head>
+<body>
+    <header>
+        <h1>VibeCheck</h1>
+    </header>
+
+    <main>
+        <section id="home-display">
+            <h2>Need a playlist?</h2>
+            <button id="start-quiz-btn">Generate</button>
+        </section>
+    </main>
+    <footer>
+        <p>Powered by Spotify</p>
+        <p>Creator: rox.e.g</p>
+    </footer>
+
+    <template id="prequiz-start-template">
+        <section id="prequiz-start">
+            <h2>Start PreQuiz</h2>
+            <p>Answer a few general questions before we get to customizing your playlist!</p>
+            <button id="start-prequiz-btn">Next</button>
+        </section> 
+    </template>
+
+    <template id="vibe-calibration-template">
+        <section id="vibe-calibration" class="question">
+            <h2>Calibrate your vibe.</h2>
+            <ul>
+                <li><button>Low</button></li>
+                <li><button>Medium</button></li>
+                <li><button>High</button></li>
+            </ul>
+            <button class="back-btn">Back</button>
+            <button class="next-btn">Next</button>
+        </section>
+    </template>
+
+    <template id="age-rating-template">
+        <section id="age-rating" class="question">
+            <h3>Age rating?</h3>
+            <ul>
+                <li><button>Keep it clean</button></li>
+                <li><button>We can get explicit</button></li>
+            </ul>
+            <button class="back-btn">Back</button>
+            <button class="next-btn">Next</button>
+        </section>
+    </template>
+
+    <template id="popularity-template">
+        <section id="popularity" class="question">
+            <h3>How cultured should this be?</h3>
+            <ul>
+                <li><button>Top hits only</button></li>
+                <li><button>As niche as you can make it</button></li>
+                <li><button>Somewhere in the middle</button></li>
+                <li><button>Any!</button></li>
+            </ul>
+            <button class="back-btn">Back</button>
+            <button class="next-btn">Next</button>
+        </section>
+    </template>
+
+    <template id="playlist-length-template">
+        <section id="playlist-length" class="question">
+            <h3>How long should the playlist be?</h3>                <input type="text" id="playlist-length">
+            <select id="length-unit-select">
+                <option value="minutes">Minutes</option>
+                <option value="songs">Songs</option>
+            </select>
+            <button class="back-btn">Back</button>
+            <button class="next-btn">Next</button>
+        </section>
+    </template>
+
+    <template id="submit-prequiz-template">
+        <section id="submit-prequiz">
+            <h2>Move on to your quiz</h2>
+            <button class="back-btn">Go Back</button>
+            <button class="next-btn">Next</button>
+        </section>
+    </template>
+
+    <template id="select-vibes-template">
+        <section id="select-vibes" class="question">
+            <h3>Select some vibes</h3>
+            <section>
+                <input type="checkbox" id="happy" name="happy" value="happy">
+                <label for="happy">Happy</label>
+
+                <input type="checkbox" id="sad" name="sad" value="sad">
+                <label for="sad">Sad</label>
+
+                <input type="checkbox" id="angry" name="angry" value="angry">
+                <label for="angry">Angry</label>
+
+                <input type="checkbox" id="upbeat" name="upbeat" value="upbeat">
+                <label for="upbeat">Upbeat</label>
+
+                <input type="checkbox" id="chill" name="chill" value="chill">
+                <label for="chill">Chill</label>
+
+                <input type="checkbox" id="slow" name="slow" value="slow">
+                <label for="slow">Slow</label>
+
+                <input type="checkbox" id="beats" name="beats" value="beats">
+                <label for="beats">Beats</label>
+
+                <input type="checkbox" id="fast" name="fast" value="fast">
+                <label for="fast">Fast</label>
+
+                <input type="checkbox" id="aggressive" name="aggressive" value="aggressive">
+                <label for="aggressive">Aggressive</label>
+
+                <input type="checkbox" id="hype" name="hype" value="hype">
+                <label for="hype">Hype</label>
+
+                <input type="checkbox" id="feels" name="feels" value="feels">
+                <label for="feels">Feels</label>
+
+                <input type="checkbox" id="energetic" name="energetic" value="energetic">
+                <label for="energetic">Energetic</label>
+            </section>
+            <button class="next-btn">Next</button>
+        </section>
+    </template>
+
+    <template id="genres-template">
+        <section id="genres" class="question">
+            <h3>Genre(s)?</h3>
+            <ul>
+                <li>
+                    <input type="checkbox" id="pop" name="pop" value="pop">
+                    <label for="pop">Pop</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="alternative" name="alternative" value="alternative">
+                    <label for="alternative">Alternative</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="rock" name="rock" value="rock">
+                    <label for="rock">Rock</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="jazz" name="jazz" value="jazz">
+                    <label for="jazz">Jazz</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="lofi" name="lofi" value="lofi">
+                    <label for="lofi">LoFi</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="hiphop" name="hiphop" value="hiphop">
+                    <label for="hiphop">Hip Hop</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="rap" name="rap" value="rap">
+                    <label for="rap">Rap</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="trap" name="trap" value="trap">
+                    <label for="trap">Trap</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="classical" name="classical" value="classical">
+                    <label for="classical">CLassical</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="rnb" name="rnb" value="rnb">
+                    <label for="rnb">R&B</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="country" name="country" value="country">
+                    <label for="country">Country</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="metal" name="metal" value="metal">
+                    <label for="metal">Metal</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="folk" name="folk" value="folk">
+                    <label for="folk">Folk</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="funk" name="funk" value="funk">
+                    <label for="funk">Funk</label>
+                </li>
+
+                <li>
+                    <input type="checkbox" id="house" name="house" value="house">
+                    <label for="house">House</label>
+                </li>
+            </ul>
+            <button class="back-btn">Back</button>
+            <button class="next-btn">Next</button>
+        </section>
+    </template>
+
+    <template id="similar-artist-template">
+        <section id="similar-artist" class="question">
+            <h3>An artist that fits in this playlist:</h3>
+            <input type="text">
+            <button class="back-btn">Back</button>
+            <button class="next-btn">Next</button>
+        </section>
+    </template>
+    
+</body>
+</html>
