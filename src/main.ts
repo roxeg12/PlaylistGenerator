@@ -1,5 +1,46 @@
 import {initComponents, PreQuiz} from "./components";
 import {PreQuizView} from "./View/view";
+
+interface QuestionData {
+    id: string;
+    question: string;
+    type: string; // possible options: oe (open-ended) or mc (multiple-choice)
+    answerChoices: string; // to be written as HTML
+}
+
+const PreQuizQuesions = new Array<QuestionData>(
+    {
+        id: "age-rating", 
+        question: "Age rating?", 
+        type: "mc", 
+        answerChoices: `<ul>
+                <li><button>Keep it clean</button></li>
+                <li><button>We can get explicit</button></li>
+                </ul>`
+    },
+    {
+        id: "popularity",
+        question: "How cultured should this be?",
+        type: "mc",
+        answerChoices: `<ul>
+                <li><button>Top hits only</button></li>
+                <li><button>As niche as you can make it</button></li>
+                <li><button>Somewhere in the middle</button></li>
+                <li><button>Any!</button></li>
+                </ul>`
+    },
+    {
+        id: "playlist-length",
+        question: "How long should the playlist be?",
+        type: "oe",
+        answerChoices: `<input type="text" id="playlist-length">
+            <select id="length-unit-select">
+                <option value="minutes">Minutes</option>
+                <option value="songs">Songs</option>
+            </select>`
+    }
+)
+
 function main(): void {
     // initialize views and models
     const startBtn = document.querySelector("#start-quiz-btn");
@@ -34,11 +75,11 @@ function startPreQuiz() {
 
     
 
-    const prequizQs = new Array<string>("vibe-calibration", "age-rating", "popularity", "playlist-length");
+    //const prequizQs = new Array<string>("vibe-calibration", "age-rating", "popularity", "playlist-length");
     const prequiz = new PreQuiz();
     main.append(prequiz);
     //homeDisplay.replaceWith(prequiz);
-    const pqView = new PreQuizView(prequizQs);
+    const pqView = new PreQuizView(PreQuizQuesions);
 
 
     

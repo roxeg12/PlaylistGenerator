@@ -32,6 +32,13 @@
         </section> 
     </template>
 
+    <template id="question-template">
+        <section class="question">
+            <h2 id="question-string">Question</h2>
+            <section id="answer-section">answer</section>
+        </section>
+    </template>
+
     <template id="vibe-calibration-template">
         <section id="vibe-calibration" class="question">
             <h2>Calibrate your vibe.</h2>
@@ -73,7 +80,8 @@
 
     <template id="playlist-length-template">
         <section id="playlist-length" class="question">
-            <h3>How long should the playlist be?</h3>                <input type="text" id="playlist-length">
+            <h3>How long should the playlist be?</h3>                
+            <input type="text" id="playlist-length">
             <select id="length-unit-select">
                 <option value="minutes">Minutes</option>
                 <option value="songs">Songs</option>

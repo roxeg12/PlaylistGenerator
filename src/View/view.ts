@@ -1,25 +1,34 @@
 import {Question} from "../components";
 
+interface QuestionData {
+    id: string;
+    question: string;
+    type: string; // possible options: oe (open-ended) or mc (multiple-choice)
+    answerChoices: string; // to be written as HTML
+}
+
 
 
 export class PreQuizView {
 
 
-    private startQuiz: HTMLButtonElement;
+    private startQuizBtn: HTMLButtonElement;
 
-    private Questions: Array<Question>;
+    private Questions: Array<QuestionData>;
 
     private Answers: Map<string, string>; // a map of each question ID to the user input answer
 
-    private currQ: Question;
+    private currQ: QuestionData;
 
     private countQ: number;
 
-    constructor(questionIDs: Array<string>) {
-        this.Questions = new Array<Question>();
-        questionIDs.forEach((question: string) => (
-            this.Questions.push(new Question(question))
-        ));
+    private question: HTMLElement;
+    private answerArea: HTMLElement;
+    private backBtn: HTMLButtonElement;
+
+    constructor(questions: Array<QuestionData>) {
+        
+        this.Questions = questions;
 
         this.Answers = new Map<string, string>();
 
@@ -27,46 +36,87 @@ export class PreQuizView {
         if(!(startBtn instanceof HTMLButtonElement)) {
             throw new Error("Prequiz not in document: no start button");
         }
-        this.startQuiz = startBtn;
-
-        this.currQ = this.Questions[0];
-
-        this.countQ = 0;
+        this.startQuizBtn = startBtn;
+        this.startQuizBtn.addEventListener("click", this.startQuiz.bind(this));
     }
 
-    nextQuestion() {
-        const qID = this.currQ.getID();
-        const answer = this.currQ.getAnswer();
-        this.Answers.set(qID, answer);
+    startQuiz() {
+        const prequizSection = document.querySelector("#prequiz-start");
+        if(!(prequizSection instanceof HTMLElement)) {
+            throw new Error("Prequiz start section does not exist");
+        }
+        const prequizParent = prequizSection.parentElement;
+        prequizParent?.removeChild(prequizSection);
 
-        const qIdx = this.countQ++;
 
-        if(qIdx < this.Questions.length){
-            this.currQ.style.display = "none";
-            this.currQ = this.Questions[qIdx];
-            const newQ = document.querySelector(`#${this.currQ.getID()}`);
-            if (!(newQ instanceof Question)){
-                document.append(this.currQ);
-            } else {
-                newQ.style.display = "flex";
+        this.currQ = this.Questions[0];
+        this.countQ = 0;
+
+        //create the question area
+        const qArea = new Question();
+        prequizParent?.append(qArea);
+
+        const question = qArea.querySelector("#question-string");
+        if(!(question instanceof HTMLHeadingElement)) {
+            throw new Error("Question heading element does not exist");
+        }
+        this.question = question;
+
+
+        const answerArea = qArea.querySelector("#answer-section");
+        if(!(answerArea instanceof HTMLElement)) {
+            throw new Error("Answer section does not exist");
+        }
+        this.answerArea = answerArea;
+        
+        const backBtn = document.querySelector("back-btn");
+        if(!(backBtn instanceof HTMLButtonElement)) {
+            throw new Error("Question back button does not exist");
+        }
+        this.backBtn = backBtn;
+
+        this.question.innerText = this.currQ.question;
+        this.answerArea.innerHTML = this.currQ.answerChoices;
+        this.backBtn.addEventListener("click", () => {
+            prequizParent?.removeChild(qArea);
+            prequizParent?.append(prequizSection);
+        });
+
+        this.answerArea.addEventListener("click", this.nextQuestion);
+    }
+
+
+    nextQuestion(event: MouseEvent) {
+        const target = event.target;
+        if (target instanceof HTMLElement) {
+            const answerBtn = target.closest("button");
+            if (answerBtn instanceof HTMLButtonElement) {
+                const qID = this.currQ.id;
+                const answer = answerBtn.innerText;
+                this.Answers.set(qID, answer);
+
+                const qIdx = this.countQ++;
+                this.currQ = this.Questions[qIdx];
+
+                // display next question
+                if(qIdx < this.Questions.length) {
+                    this.question.innerText = this.currQ.question;
+                    this.answerArea.innerHTML = this.currQ.answerChoices;
+                }
             }
-
-        } else {
-            // end of Prequiz?
         }
     }
 
     prevQuestion() {
-        this.currQ.style.display = "none";
 
         const qIdx = this.countQ--;
         this.currQ = this.Questions[qIdx];
 
-        const newQ = document.querySelector(`#${this.currQ.getID()}`);
-        if (!(newQ instanceof Question)){
-            document.append(this.currQ);
+        if(qIdx >= 0) {
+            this.question.innerText = this.currQ.question;
+            this.answerArea.innerHTML = this.currQ.answerChoices;
         } else {
-            newQ.style.display = "flex";
+            // show prequiz??
         }
         
     }

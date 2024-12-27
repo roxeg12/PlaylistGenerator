@@ -7,9 +7,11 @@ function getTemplate1(id: string): HTMLTemplateElement {
 }
 
 
+
 export class PreQuiz extends HTMLElement {
     
     private static template: HTMLTemplateElement;
+
 
     static initialize(){
         PreQuiz.template = getTemplate1("prequiz-start");
@@ -31,10 +33,15 @@ export class PreQuiz extends HTMLElement {
 }
 
 export class Question extends HTMLElement {
-    private template: HTMLTemplateElement;
+    private static template: HTMLTemplateElement;
+    initialize() {
+        Question.template = getTemplate1("question");
+
+    }
+
     private controller: AbortController | null = null;
 
-    private ID: string;
+
 
     private backBtn: HTMLButtonElement | null = null;
     private nextBtn: HTMLButtonElement;
@@ -43,18 +50,11 @@ export class Question extends HTMLElement {
 
     private answer: string;
 
-    constructor(id: string) {
+    constructor() {
         super();
 
-        this.ID = id;
 
-        const template = getTemplate1(`${id}-template`);
-        if(!(template instanceof HTMLTemplateElement)) {
-            console.error(`Template for question ${id} does not exist`);
-            throw new Error("Missing question template");
-        }
-        this.template = template;
-        const clone = template.content.cloneNode(true);
+        const clone = Question.template.content.cloneNode(true);
         this.append(clone);
 
         const backBtn = this.querySelector(".back-btn");
@@ -99,10 +99,9 @@ export class Question extends HTMLElement {
         return this.question;
     }
 
-    getID() {
-        return this.ID;
-    }
 }
+
+
 
 export function initComponents() {
     PreQuiz.initialize();
