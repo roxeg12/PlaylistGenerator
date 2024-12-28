@@ -13,14 +13,14 @@ export class PreQuiz extends HTMLElement {
     private static template: HTMLTemplateElement;
 
 
-    static initialize(){
-        PreQuiz.template = getTemplate1("prequiz-start");
+    static initialize(id: string){
+        PreQuiz.template = getTemplate1(id);
     }
 
-    constructor() {
+    constructor(struct: HTMLElement) {
         super();
         this.append(PreQuiz.template.content.cloneNode(true));
-
+        //this.append(struct.cloneNode(true));
     }
 
     connectedCallback() {
@@ -32,9 +32,11 @@ export class PreQuiz extends HTMLElement {
     }
 }
 
+
 export class Question extends HTMLElement {
     private static template: HTMLTemplateElement;
-    initialize() {
+
+    static initialize() {
         Question.template = getTemplate1("question");
 
     }
@@ -57,6 +59,7 @@ export class Question extends HTMLElement {
         const clone = Question.template.content.cloneNode(true);
         this.append(clone);
 
+        /*
         const backBtn = this.querySelector(".back-btn");
         if(!(backBtn instanceof HTMLButtonElement)) {
             this.backBtn = null;
@@ -75,6 +78,7 @@ export class Question extends HTMLElement {
             throw new Error("Missing h3 element containing question");
         }
         this.question = question.innerText;
+        */
 
     }
 
@@ -104,9 +108,12 @@ export class Question extends HTMLElement {
 
 
 export function initComponents() {
-    PreQuiz.initialize();
+    PreQuiz.initialize("prequiz-start");
+
+    Question.initialize();
 
     customElements.define("pre-quiz", PreQuiz);
+
     customElements.define("quiz-question", Question);
 }
 

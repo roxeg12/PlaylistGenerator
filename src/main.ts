@@ -37,7 +37,8 @@ const PreQuizQuesions = new Array<QuestionData>(
             <select id="length-unit-select">
                 <option value="minutes">Minutes</option>
                 <option value="songs">Songs</option>
-            </select>`
+            </select>
+            <button>Submit</button>`
     }
 )
 
@@ -75,7 +76,6 @@ function startPreQuiz() {
 
     
 
-    //const prequizQs = new Array<string>("vibe-calibration", "age-rating", "popularity", "playlist-length");
     const prequiz = new PreQuiz();
     main.append(prequiz);
     //homeDisplay.replaceWith(prequiz);
@@ -84,6 +84,7 @@ function startPreQuiz() {
 
     
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
     main();

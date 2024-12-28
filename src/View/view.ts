@@ -14,6 +14,8 @@ export class PreQuizView {
 
     private startQuizBtn: HTMLButtonElement;
 
+    private prequizSection: HTMLElement;
+
     private Questions: Array<QuestionData>;
 
     private Answers: Map<string, string>; // a map of each question ID to the user input answer
@@ -27,10 +29,10 @@ export class PreQuizView {
     private backBtn: HTMLButtonElement;
 
     constructor(questions: Array<QuestionData>) {
-        
         this.Questions = questions;
 
-        this.Answers = new Map<string, string>();
+        let answers = new Map<string, string>();
+        this.Answers = answers;
 
         const startBtn = document.querySelector("#start-prequiz-btn");
         if(!(startBtn instanceof HTMLButtonElement)) {
@@ -41,20 +43,25 @@ export class PreQuizView {
     }
 
     startQuiz() {
-        const prequizSection = document.querySelector("#prequiz-start");
+        const prequizSection = document.querySelector("pre-quiz");
         if(!(prequizSection instanceof HTMLElement)) {
             throw new Error("Prequiz start section does not exist");
         }
-        const prequizParent = prequizSection.parentElement;
-        prequizParent?.removeChild(prequizSection);
+        this.prequizSection = prequizSection;
+        const prequizParent = document.querySelector("main");
+        if (!(prequizParent instanceof HTMLElement)) {
+            throw new Error("Main does not exist in document");
+        }
+        prequizParent.removeChild(prequizSection);
 
 
         this.currQ = this.Questions[0];
+        console.log(JSON.stringify(this.currQ));
         this.countQ = 0;
 
         //create the question area
         const qArea = new Question();
-        prequizParent?.append(qArea);
+        prequizParent.appendChild(qArea);
 
         const question = qArea.querySelector("#question-string");
         if(!(question instanceof HTMLHeadingElement)) {
@@ -69,7 +76,7 @@ export class PreQuizView {
         }
         this.answerArea = answerArea;
         
-        const backBtn = document.querySelector("back-btn");
+        const backBtn = document.querySelector("#back-btn");
         if(!(backBtn instanceof HTMLButtonElement)) {
             throw new Error("Question back button does not exist");
         }
@@ -77,39 +84,66 @@ export class PreQuizView {
 
         this.question.innerText = this.currQ.question;
         this.answerArea.innerHTML = this.currQ.answerChoices;
-        this.backBtn.addEventListener("click", () => {
-            prequizParent?.removeChild(qArea);
-            prequizParent?.append(prequizSection);
-        });
+        this.backBtn.addEventListener("click", this.prevQuestion.bind(this));
 
-        this.answerArea.addEventListener("click", this.nextQuestion);
+        this.answerArea.addEventListener("click", (ev) => {
+            this.nextQuestionClick(ev, this.currQ.type)
+        });
     }
 
 
-    nextQuestion(event: MouseEvent) {
+    nextQuestionClick(event: MouseEvent, type: string) {
         const target = event.target;
         if (target instanceof HTMLElement) {
             const answerBtn = target.closest("button");
             if (answerBtn instanceof HTMLButtonElement) {
-                const qID = this.currQ.id;
-                const answer = answerBtn.innerText;
-                this.Answers.set(qID, answer);
+                console.log(type);
+                this.nextQuestion(answerBtn);
+            }
+        }
+    }
 
-                const qIdx = this.countQ++;
-                this.currQ = this.Questions[qIdx];
+    nextQuestion(answerBtn: HTMLButtonElement) {
+        console.log("nextQuestion called");
+        const qID = this.currQ.id;
+        var answer: string;
+        if(this.currQ.type == "mc") {
+            console.log("type mc");
+            answer = answerBtn.innerText;
+        } else{
+            console.log("type oe");
+            const input = this.answerArea.querySelector("input");
+            if (!(input instanceof HTMLElement)) {
+                throw new Error("Input does not exist for open ended question");
+            }
+            answer = input.value;
+        }
+        console.log("qID:", qID);
+        console.log("answer:", answer);
+        this.Answers.set(qID, answer);
+        console.log("set answer in map")
 
-                // display next question
-                if(qIdx < this.Questions.length) {
-                    this.question.innerText = this.currQ.question;
-                    this.answerArea.innerHTML = this.currQ.answerChoices;
-                }
+
+        const qIdx = ++this.countQ;
+        console.log("qIdx", qIdx);
+        this.currQ = this.Questions[qIdx];
+        console.log("currQ", JSON.stringify(this.currQ));
+
+        // display next question
+        if(qIdx < this.Questions.length) {
+            this.question.innerText = this.currQ.question;
+            this.answerArea.innerHTML = this.currQ.answerChoices;
+        } else {
+            this.question.innerText = "Answers:";
+            for (let entry of this.Answers.entries()) {
+                this.answerArea.innerHTML= this.answerArea.innerText + `question: ${entry[0]}, answer: ${entry[1]}\n`
             }
         }
     }
 
     prevQuestion() {
 
-        const qIdx = this.countQ--;
+        const qIdx = --this.countQ;
         this.currQ = this.Questions[qIdx];
 
         if(qIdx >= 0) {
@@ -117,9 +151,25 @@ export class PreQuizView {
             this.answerArea.innerHTML = this.currQ.answerChoices;
         } else {
             // show prequiz??
+
+            const prequizParent = document.querySelector("main");
+            if (!(prequizParent instanceof HTMLElement)) {
+                throw new Error("Main does not exist in document");
+            }
+            const qArea = document.querySelector("quiz-question");
+            if(!(qArea instanceof Question)) {
+                throw new Error("Question area does not exist in document");
+            }
+            prequizParent.removeChild(qArea);
+            prequizParent.append(this.prequizSection);
         }
         
     }
 
+    getAnswers(): Map<string, string> {
+        return this.Answers;
+    }
+
 
 }
+
