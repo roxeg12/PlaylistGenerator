@@ -7,7 +7,9 @@ function getTemplate1(id: string): HTMLTemplateElement {
 }
 
 
-
+/**
+ * A custom component that has the necessary template of the prequiz.
+ */
 export class PreQuiz extends HTMLElement {
     
     private static template: HTMLTemplateElement;
@@ -17,7 +19,7 @@ export class PreQuiz extends HTMLElement {
         PreQuiz.template = getTemplate1(id);
     }
 
-    constructor(struct: HTMLElement) {
+    constructor() {
         super();
         this.append(PreQuiz.template.content.cloneNode(true));
         //this.append(struct.cloneNode(true));
@@ -32,7 +34,9 @@ export class PreQuiz extends HTMLElement {
     }
 }
 
-
+/**
+ * A custom component that displays the necessary elements of a Question.
+ */
 export class Question extends HTMLElement {
     private static template: HTMLTemplateElement;
 
@@ -106,7 +110,9 @@ export class Question extends HTMLElement {
 }
 
 
-
+/**
+ * Initialize the custom components
+ */
 export function initComponents() {
     PreQuiz.initialize("prequiz-start");
 
@@ -115,5 +121,13 @@ export function initComponents() {
     customElements.define("pre-quiz", PreQuiz);
 
     customElements.define("quiz-question", Question);
+}
+
+/**
+ * Allow reinitialization of the PreQuiz to use a different starting template.
+ * @param id the id of the template to be used
+ */
+export function reInitPreQuiz(id: string) {
+    PreQuiz.initialize(id);
 }
 
