@@ -21,6 +21,13 @@ interface submitPrequizEventDetail {
 }
 
  /**
+  * Identifies the detail for the custom event dispatched when the quiz is submitted
+  */
+ interface submitQuizEventDetail {
+    answers: Map<string, string> // the quiz answers
+}
+
+ /**
   * Identifies the detail for the custom event dispatched when a quiz is submitted
   */
 interface QuizAnswersEventDetail {
@@ -239,8 +246,61 @@ function startQuiz(event: Event) {
     }
     const quizView = new PreQuizView(questions, "quiz");
 
+    document.addEventListener("submitQuizEvent", (ev) => {
+        const event = ev as CustomEvent<submitQuizEventDetail>;
+        const qAnswers = event.detail.answers;
+        transitionToGenerate(pqAnswers, qAnswers);
+    });
 
+}
 
+/**
+ * Displays a transition screen prompting the user to press a button to 
+ * generate the playlist
+ */
+function transitionToGenerate(pqAnswers: Map<string, string>, qAnswers: Map<string, string>) {
+    const main = document.querySelector("main");
+    if (!(main instanceof HTMLElement)) {
+        throw new Error("Main does not exist in document");
+    }
+    const question = document.querySelector("quiz-question");
+    if(!(question instanceof Question)) {
+        throw new Error("Question does not exist on page");
+    }
+
+    const section = document.createElement("section");
+    section.id = "generate-transition";
+    const heading = document.createElement("h3");
+    heading.innerText = "Quiz Complete. Click to generate playlist";
+    const btn = document.createElement("button");
+    btn.innerText = "Generate";
+    section.append(heading, btn);
+
+    main.removeChild(question);
+    main.appendChild(section);
+
+    btn.addEventListener("click", () => generatePlaylist(pqAnswers, qAnswers));
+}
+
+function generatePlaylist(pqAnswers: Map<string, string>, qAnswers: Map<string, string>) {
+    const main = document.querySelector("main");
+    if (!(main instanceof HTMLElement)) {
+        throw new Error("Main does not exist in document");
+    }
+    const transition = document.querySelector("#generate-transition");
+    if(!(transition instanceof HTMLElement)) {
+        throw new Error("Document does not have generation transition");
+    }
+    // replace in main with a loading page
+
+    // Create prompt
+    // Call openAI model with prompt to generate key words/ request info
+
+    // call spotify API using keywords, return list of songs
+
+    // Initialize playlist view, using song list
+
+    // display playlist view
 }
 
 /**
