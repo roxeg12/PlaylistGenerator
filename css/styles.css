@@ -9,6 +9,12 @@ body {
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
 }
 
 header {
@@ -20,6 +26,7 @@ header {
     top: 0;
     width: 100%;
     padding: 0;
+    height: 100px;
 }
 
 header h1 {
@@ -28,14 +35,15 @@ header h1 {
 }
 
 main {
+
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 8% 0;
+    margin: 0;
     justify-self: center;
     background-color: rgba(198, 213, 216, 0.893);
-    width: 25%;
-    height: 300px;
+    width: fit-content;
+    height: fit-content;
     border: black 3px solid;
     border-radius: 8;
 }
@@ -43,18 +51,19 @@ main {
 #home-display {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 30px 50px 30px;
 }
 
-#home-display h2 {
-    justify-self: center;
-}
 
 #home-display button {
-    justify-self: center;
-    align-self: center;
-    height: 50px;
-    width: 200px;
-    margin: 4rem 5.5rem ;
+
+    margin-top: 20px;
+
+    height: 53px;
+    width: 150px;
     border: none;
     border-radius: 5;
     transition: 0.3s;
@@ -62,7 +71,107 @@ main {
 
 #home-display button:hover {
     background-color: rgb(187, 187, 187);
+    cursor: pointer;
 }
+
+pre-quiz {
+    width: 100%;
+    height: 100%;
+}
+
+#prequiz-start, #quiz-start, #generate-transition {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 30px 50px 30px;
+    align-items: center;
+
+}
+
+#prequiz-start p, #quiz-start p, #generate-transition p {
+    text-align: center;
+    padding: 0 50px;
+}
+
+#prequiz-start button, #quiz-start button, #generate-transition button {
+    height: 40px;
+    width: 150px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 5;
+    transition: 0.3s;
+}
+
+#prequiz-start button:hover, #quiz-start button:hover, #generate-transition button:hover {
+    background-color: rgb(187, 187, 187);
+    cursor: pointer;
+}
+
+
+quiz-question {
+    width: 100%;
+    height: 100%;
+}
+
+
+
+.question {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 30px 50px 30px;
+    position: relative;
+}
+
+#answer-section {
+    padding: 15px;
+
+}
+
+.question #answer-section button {
+    width: 100%;
+    min-width: 100px;
+    height: 40px;
+    border: none;
+    border-radius: 3;
+    margin: 1px 0;
+    transition: 0.2s;
+    background-color: rgba(245, 245, 245, 0.63);
+}
+
+#answer-section button:hover {
+    background-color: rgba(221, 220, 220, 0.63);
+    cursor: pointer;
+}
+
+#answer-section input[type="text"] {
+    width: 97%;
+    height: 25px;
+    margin-bottom: 5px;
+}
+
+quiz-question ul {
+    list-style: none;
+    padding: 0;
+}
+
+#back-btn {
+    border: none;
+    background: none;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin: 4px;
+}
+
+#back-btn:hover {
+    color: rgba(61, 61, 61, 0.714);
+    cursor: pointer;
+}
+
 
 footer {
     display: flex;
@@ -75,6 +184,7 @@ footer {
     width: 100%;
     padding: 7px 0px;
     gap: 7px;
+    height: 50px;
 }
 
 footer p {
