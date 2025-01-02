@@ -36,6 +36,35 @@ interface QuizAnswersEventDetail {
 }
 
 /**
+ * A generic interface that represents an Answers map returned
+ * by the quiz view, by any given length of quiz
+ */
+interface QuizAnswers {
+    [x: string]: string
+}
+
+/**
+ * An Answers map returned by the quiz view, contains all 
+ * question IDs of a Mini length quiz
+ */
+interface MiniQuizAnswers extends QuizAnswers{
+    "playist-vibe": string;
+    "similar-artist": string;
+    "dissimilar-song": string;
+}
+
+/**
+ * An Answers map returned by the prequiz view, contains all question
+ * IDs of the prequiz
+ */
+interface PreQuizAnswers {
+    "age-rating": string;
+    popularity: string;
+    "playlist-length": string,
+    "quiz-length": string
+}
+
+/**
  * The questions for the user to answer during the PreQuiz
  */
 const PreQuizQuesions = new Array<QuestionData>(
@@ -301,6 +330,40 @@ function generatePlaylist(pqAnswers: Map<string, string>, qAnswers: Map<string, 
     // Initialize playlist view, using song list
 
     // display playlist view
+}
+
+function createPrompt(pqAnswers: Map<string, string>, qAnswers: Map<string, string>, length: string ){
+    switch(length) {
+        case 'Mini':
+
+    }
+}
+
+function createMiniPrompt(qAnswers: MiniQuizAnswers): string {
+    const vibeSet = qAnswers["playist-vibe"];
+    const vibes = vibeSet.split(" ");
+
+    const artist = qAnswers["similar-artist"];
+
+    var dissimilar = qAnswers["dissimilar-song"].split("by");
+    if (dissimilar.length == 0) {
+        dissimilar = ["", ""];
+    }
+    const disSong = dissimilar[0];
+    const disArtist = dissimilar[1];
+
+    var string1 = `Give me a list of music genres that elicit the
+    emotions or vibes listed below. Each vibe descriptor should be matched to at least one music genre, more if
+    there is are strong enough associations. Return a list of ONLY music genres, separated by commas
+    no more and no less. The descriptors: `
+
+    vibes.forEach((vibe: string) => {
+        string1 += `${vibe}, `;
+    });
+
+    return string1;
+
+    
 }
 
 /**
