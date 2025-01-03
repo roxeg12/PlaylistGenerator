@@ -50,6 +50,31 @@ export type SpotifyAccessTokenResponse = FromSchema<typeof SpotifyAccessTokenRes
 
 let isSpotifyAccessTokenResponse = compile(SpotifyAccessTokenResponseSchema);
 
+const SpotifySearchResponseSchema = {
+    $id: "search-response.json",
+    $schema: "http://json-schema.org/draft-07/schema",
+    title: "SpotifySearchResponse",
+    type: "object",
+    required: ["href", "limit", "next", "offset", "previous", "total", "items"],
+    properties: {
+        href: {type: "string"},
+        limit: {type: "number"},
+        next: {type: "string"},
+        offset: {type: "number"},
+        previous: {type: "string"},
+        total: {type: "number"},
+        items: {
+            type: "array",
+
+        }
+    },
+    additionalProperties: false
+} as const satisfies JSONSchema;
+
+export type SpotifySearchResponse = FromSchema<typeof SpotifySearchResponseSchema>;
+
+let isSpotifySearchResponse = compile(SpotifySearchResponseSchema);
+
 
 export function typedFetch<T>(
     url: string,
@@ -85,10 +110,10 @@ class OpenAIModel {
 
     private url: string;
 
-    constructor(key: string) {
+    constructor(key: string, url: string) {
         this.accessKey = key;
         this.timestamp = new Date();
-        this.url = "https://api.openai.com/v1/chat/completions"
+        this.url = url;
     }
 
     private createCompletionRequest(prompt:string): Request {
@@ -126,8 +151,8 @@ class OpenAIModel {
 
 }
 
-export function initOpenAiModel(key: string): OpenAIModel {
-    return new OpenAIModel(key);
+export function initOpenAiModel(key: string, url: string): OpenAIModel {
+    return new OpenAIModel(key, url);
 }
 
 class SpotifyModel {
@@ -147,8 +172,6 @@ class SpotifyModel {
 
     }
 
-
-
     
     generateAccessKey(clientID: string, clientSecret: string): Promise<string> {
         let request = {
@@ -167,6 +190,28 @@ class SpotifyModel {
             this.timestamp = new Date(now.getTime() + response.expires_in);
             return response.access_token;
         });
+    }
+
+    searchGenre(genre: string): Promise<SpotifySearchResponse> {
+        let url = this.url + `/search?q=genre:${genre}&type=track`;
+        let request = {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${this.accessKey}`
+            }
+        }
+        return typedFetch(url, isSpotifySearchResponse, request);
+    }
+
+    searchGenreAndArtist(genre: string, artist: string): Promise<SpotifySearchResponse> {
+        let url = this.url + `/search?q=genre:${genre} artist:${artist}&type=track`;
+        let request = {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${this.accessKey}`
+            }
+        }
+        return typedFetch(url, isSpotifySearchResponse, request);
     }
 
 

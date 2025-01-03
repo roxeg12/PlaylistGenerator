@@ -1,5 +1,14 @@
 import {initComponents, PreQuiz, Question, reInitPreQuiz} from "./components";
+import { initOpenAiModel, initSpotifyModel } from "./Model/model";
 import {PreQuizView} from "./View/view";
+
+declare const process: {
+    env: {
+        OPEN_AI_ACCESS_KEY: string;
+        SPOTIFY_CLIENT_ID: string;
+        SPOTIFY_CLIENT_SECRET: string;
+    };
+};
 
 /**
  * The QuestionData interface serves to identify the type of mapping that
@@ -204,6 +213,16 @@ function main(): void {
     }
     
     initComponents();
+
+    const openAIkey = process.env.OPEN_AI_ACCESS_KEY;
+    const openAIUrl = "https://api.openai.com/v1/chat/completions";
+
+    const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
+    const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    const SpotifyUrl = `https://api.spotify.com/v1`;
+
+    const openAImodel = initOpenAiModel(openAIkey, openAIUrl);
+    const spotifyModel = initSpotifyModel(spotifyClientId, spotifyClientSecret, SpotifyUrl);
 
     startBtn.addEventListener("click", startPreQuiz);
     
