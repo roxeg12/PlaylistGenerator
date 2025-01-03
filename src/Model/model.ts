@@ -104,7 +104,7 @@ export function typedFetch<T>(
     });
   }
 
-class OpenAIModel {
+export class OpenAIModel {
     private accessKey: string;
     private timestamp: Date;
 
@@ -155,7 +155,7 @@ export function initOpenAiModel(key: string, url: string): OpenAIModel {
     return new OpenAIModel(key, url);
 }
 
-class SpotifyModel {
+export class SpotifyModel {
     private url: string;
     private accessKey: string;
     private timestamp: Date;

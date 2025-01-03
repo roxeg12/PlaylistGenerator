@@ -1,5 +1,6 @@
 import {initComponents, PreQuiz, Question, reInitPreQuiz} from "./components";
-import { initOpenAiModel, initSpotifyModel } from "./Model/model";
+import { Controller } from "./controller";
+import { initOpenAiModel, initSpotifyModel, OpenAIModel } from "./Model/model";
 import {PreQuizView} from "./View/view";
 
 declare const process: {
@@ -224,6 +225,83 @@ function main(): void {
     const openAImodel = initOpenAiModel(openAIkey, openAIUrl);
     const spotifyModel = initSpotifyModel(spotifyClientId, spotifyClientSecret, SpotifyUrl);
 
+    const controller = new Controller(openAImodel, spotifyModel);
+
+        /**
+     * Begins the prequiz. Replaces the default home display with the prequiz start display,
+     * and initializes the quiz view
+     * @returns void
+     */
+    function startPreQuiz() {
+        // remove stuff on home screen
+        // display first question
+        const homeDisplay = document.querySelector("#home-display");
+        if(!(homeDisplay instanceof HTMLElement)) {
+            console.log("Home display does not exist on page");
+            window.location.reload();
+            return;
+        }
+
+        const main = document.querySelector("main");
+        if (!(main instanceof HTMLElement)) {
+            throw new Error("Main content area does not exist in html");
+        }
+        main.removeChild(homeDisplay);
+        //homeDisplay.style.display = "none";
+
+        
+
+        const prequiz = new PreQuiz();
+        main.append(prequiz);
+        //homeDisplay.replaceWith(prequiz);
+        const pqView = new PreQuizView(PreQuizQuesions, "prequiz");
+    }
+
+    /**
+     * Begins the quiz. Replaces the prequiz view with the quiz view, and 
+     * initializes the quiz view with the appropriate questions.
+     * @param event a prequiz submission event
+     */
+    function startQuiz(event: Event) {
+        console.log("start quiz function called in main.ts");
+        const ev = event as CustomEvent<submitPrequizEventDetail>;
+        const length = ev.detail.quizLength;
+        const pqAnswers = ev.detail.answers;
+
+        const main = document.querySelector("main");
+        if (!(main instanceof HTMLElement)) {
+            throw new Error("Main does not exist in document");
+        }
+        const question = document.querySelector("quiz-question");
+        if(!(question instanceof Question)) {
+            throw new Error("Question does not exist on page");
+        }
+
+        reInitPreQuiz("quiz-start");
+        const quiz = new PreQuiz();
+
+        main.removeChild(question);
+        main.appendChild(quiz);
+        var questions: QuestionData[];
+        if(length == "Mini") {
+            questions = QuizQuestions;
+        } else {
+            //CHANGE THIS FOR OTHER QUIZ SIZES
+            questions = PreQuizQuesions;
+        }
+        const quizView = new PreQuizView(questions, "quiz");
+
+        document.addEventListener("submitQuizEvent", (ev) => {
+            const event = ev as CustomEvent<submitQuizEventDetail>;
+            const qAnswers = event.detail.answers;
+            console.log(`startQuiz qAnswers: `);
+            console.log(qAnswers);
+            controller.transitionToGenerate(pqAnswers, qAnswers);
+        });
+
+    }
+
+
     startBtn.addEventListener("click", startPreQuiz);
     
     document.addEventListener("submitPrequizEvent", startQuiz)
@@ -235,7 +313,7 @@ function main(): void {
  * and initializes the quiz view
  * @returns void
  */
-function startPreQuiz() {
+/*function startPreQuiz() {
     // remove stuff on home screen
     // display first question
     const homeDisplay = document.querySelector("#home-display");
@@ -258,14 +336,14 @@ function startPreQuiz() {
     main.append(prequiz);
     //homeDisplay.replaceWith(prequiz);
     const pqView = new PreQuizView(PreQuizQuesions, "prequiz");
-}
+}*/
 
 /**
  * Begins the quiz. Replaces the prequiz view with the quiz view, and 
  * initializes the quiz view with the appropriate questions.
  * @param event a prequiz submission event
  */
-function startQuiz(event: Event) {
+/*function startQuiz(event: Event) {
     console.log("start quiz function called in main.ts");
     const ev = event as CustomEvent<submitPrequizEventDetail>;
     const length = ev.detail.quizLength;
@@ -300,13 +378,15 @@ function startQuiz(event: Event) {
         transitionToGenerate(pqAnswers, qAnswers);
     });
 
-}
+}*/
+
+
 
 /**
  * Displays a transition screen prompting the user to press a button to 
  * generate the playlist
  */
-function transitionToGenerate(pqAnswers: Map<string, string>, qAnswers: Map<string, string>) {
+/*function transitionToGenerate(pqAnswers: Map<string, string>, qAnswers: Map<string, string>) {
     const main = document.querySelector("main");
     if (!(main instanceof HTMLElement)) {
         throw new Error("Main does not exist in document");
@@ -349,7 +429,7 @@ function generatePlaylist(pqAnswers: Map<string, string>, qAnswers: Map<string, 
     // Initialize playlist view, using song list
 
     // display playlist view
-}
+}*/
 
 function createPrompt(pqAnswers: Map<string, string>, qAnswers: Map<string, string>, length: string ){
     switch(length) {

@@ -109,6 +109,55 @@ export class Question extends HTMLElement {
 
 }
 
+export class SongItem extends HTMLElement {
+    private static template: HTMLTemplateElement;
+
+    static initialize(id: string) {
+        SongItem.template = getTemplate1(id);
+    }
+
+    private controller: AbortController | null = null;
+
+    private songName: string;
+    private artistName: string;
+    private imgLink: string;
+
+    constructor(songName: string, artist: string, img: string) {
+        super();
+        this.songName = songName;
+        this.artistName = artist;
+        this.imgLink = img;
+
+        this.append(SongItem.template.content.cloneNode(true));
+
+        const imgElem = this.querySelector(".song-img");
+        if(!(imgElem instanceof HTMLImageElement)) {
+            throw new Error("Image Element does not exist in SongItem template");
+        }
+        const titleElem = this.querySelector(".song-title");
+        if(!(titleElem instanceof HTMLParagraphElement)) {
+            throw new Error("Title paragraph element does not exist in SongItem template");
+        }
+        const artistElem = this.querySelector(".artist-name");
+        if(!(artistElem instanceof HTMLParagraphElement)) {
+            throw new Error("Artist paragraph element does not exist in SongItem template");
+        }
+
+        imgElem.src = img;
+        titleElem.innerText = songName;
+        artistElem.innerText = artist;
+
+    }
+
+    connectedCallBack() {
+        this.controller = new AbortController();
+    }
+
+    disconnectedCallback() {
+        this.controller?.abort();
+    }
+}
+
 
 /**
  * Initialize the custom components

@@ -1,4 +1,4 @@
-import {Question} from "../components";
+import {Question, SongItem} from "../components";
 
 /**
  * The QuestionData interface serves to identify the type of mapping that
@@ -24,6 +24,12 @@ interface submitPrequizEventDetail {
   */
 interface submitQuizEventDetail {
     answers: Map<string, string> // the quiz answers
+}
+
+interface SongData {
+    title: string;
+    artist: string;
+    imgLink: string;
 }
 
 /**
@@ -205,6 +211,7 @@ export class PreQuizView {
                 document.dispatchEvent(submitPrequizEvent);
                 console.log("Prequiz submission event dispatched");
             } else {
+                console.log("nextQuestion");
                 console.log(this.Answers);
                 const submitQuizEvent = new CustomEvent<submitQuizEventDetail>("submitQuizEvent",
                     {detail: {answers: this.Answers}}
@@ -249,5 +256,24 @@ export class PreQuizView {
     }
 
 
+}
+
+export class PlaylistView {
+    private PlaylistSection: HTMLElement; // a section element
+    private songList: Array<SongData>;
+
+    constructor(playlistSection: HTMLElement, songList: Array<SongData>) {
+        this.PlaylistSection = playlistSection;
+        this.songList = songList;
+    }
+
+    displayPlaylist() {
+        this.songList.forEach((song: SongData) => {
+            const songElem = new SongItem(song.title, song.artist, song.imgLink);
+            this.PlaylistSection.appendChild(songElem);
+        });
+    }
+
+    
 }
 
