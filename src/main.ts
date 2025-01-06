@@ -8,6 +8,7 @@ declare const process: {
         OPEN_AI_ACCESS_KEY: string;
         SPOTIFY_CLIENT_ID: string;
         SPOTIFY_CLIENT_SECRET: string;
+        SPOTIFY_ACCESS_KEY: string;
     };
 };
 
@@ -220,10 +221,11 @@ function main(): void {
 
     const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
     const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    const spotifyAccessKey = process.env.SPOTIFY_ACCESS_KEY;
     const SpotifyUrl = `https://api.spotify.com/v1`;
 
     const openAImodel = initOpenAiModel(openAIkey, openAIUrl);
-    const spotifyModel = initSpotifyModel(spotifyClientId, spotifyClientSecret, SpotifyUrl);
+    const spotifyModel = initSpotifyModel(spotifyAccessKey, SpotifyUrl);
 
     const controller = new Controller(openAImodel, spotifyModel);
 

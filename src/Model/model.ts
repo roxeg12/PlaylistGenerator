@@ -13,6 +13,12 @@ interface Request {
     body?: string;
 }
 
+interface SongData {
+    title: string;
+    artist: string;
+    imgLink: string;
+}
+
 const ajv = new Ajv();
 const $compile: $Compiler = (schema) => ajv.compile(schema);
 const compile = wrapCompilerAsTypeGuard($compile);
@@ -33,6 +39,46 @@ export type GenreList = FromSchema<typeof GenreListScema>;
 
 let isGenreList = compile(GenreListScema);
 
+const OpenAIResponseSchema = {
+    $id: "openai-response.json",
+    $schema: "http://json-schema.org/draft-07/schema",
+    title: "OpenAIResponse",
+    type: "object",
+    required: ["id", "object", "created", "usage", "choices"],
+    properties: {
+        id: {type: "string"},
+        object: {type: "string"},
+        created: {type: "number"},
+        model: {type: "string"},
+        usage: {
+            type: "object",
+        },
+        choices: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    message: {
+                        type: "object",
+                        required: ["content"],
+                        properties: {
+                            role: {type: "string"},
+                            content: {type: "string"}
+                        }
+                    },
+                    index: {type: "number"}
+                },
+                additionalProperties: true
+            }
+        }
+    },
+    additionalProperties: true
+} as const satisfies JSONSchema;
+
+export type OpenAIReponse = FromSchema<typeof OpenAIResponseSchema>;
+
+let isOpenAIResponse = compile(OpenAIResponseSchema);
+
 const SpotifyAccessTokenResponseSchema = {
     $id: "spotify-token-reponse.json",
     $schema: "http://json-schema.org/draft-07/schema",
@@ -49,6 +95,148 @@ const SpotifyAccessTokenResponseSchema = {
 export type SpotifyAccessTokenResponse = FromSchema<typeof SpotifyAccessTokenResponseSchema>;
 
 let isSpotifyAccessTokenResponse = compile(SpotifyAccessTokenResponseSchema);
+
+
+const SpotifyImgObjectSchema = {
+    $id: "spotify-img.json",
+    $schema: "http://json-schema.org/draft-07/schema",
+    title: "SpotifyImgObject",
+    required: ["url", "height", "width"],
+    properties: {
+        url: {type: "string"},
+        height: {type: "number"},
+        width: {type: "number"}
+    },
+    additionalProperties: false,
+} as const satisfies JSONSchema;
+
+export type SpotifyImgObject = FromSchema<typeof SpotifyImgObjectSchema>;
+
+let isSpotifyImgObject = compile(SpotifyImgObjectSchema);
+
+const SpotifyArtistObjectSchema = {
+    $id: "spotify-artist.json",
+    $schema: "http://json-schema.org/draft=07/schema",
+    title: "SpotifyArtistObject",
+    type: "object",
+    required: ["id", "name", "type", "uri"],
+    properties: {
+        id: {type: "string"},
+        name: {type: "string"},
+        type: {type: "string"},
+        uri: {type: "string"},
+    },
+    additionalProperties: true
+} as const satisfies JSONSchema;
+
+export type SpotifyArtistObject = FromSchema<typeof SpotifyArtistObjectSchema>;
+
+let isSpotifyArtistObject = compile(SpotifyArtistObjectSchema);
+
+const SpotifyAlbumObjectSchema = {
+    $id: "spotify-album.json",
+    $schema: "http://json-schema.org/draft-07/schema",
+    title: "SpotifyAlbumObject",
+    type: "object",
+    required: ["album_type", "id", "total_tracks", "available_markets", "external_urls", "href", "images", "name", "release_date", "type", "uri", "artists"],
+    properties: {
+        "album_type": {type: "string"},
+        "total_tracks": {type: "number"},
+        "available_markets": {
+            type: "array",
+            items: {type: "string"},
+        },
+        "external_urls": {type: "object"},
+        href: {type: "string"},
+        id: {type: "string"},
+        images: {
+            type: "array",
+            items: {
+                $ref: "spotify-img.json"
+            }
+        },
+        name: {type: "string"},
+        "release_date": {type: "string"},
+        "release_date_precision": {type: "string"},
+        type: {type: "string"},
+        uri: {type: "string"},
+        artists: {
+            type: "array",
+            items: {
+                $ref: "spotify-artist.json"
+            }
+        }
+    }
+} as const satisfies JSONSchema;
+
+export type SpotifyAlbumObject = FromSchema<typeof SpotifyAlbumObjectSchema, {references: [typeof SpotifyImgObjectSchema, typeof SpotifyArtistObjectSchema]}>;
+
+let isSpotifyAlbumObject = compile(SpotifyAlbumObjectSchema);
+
+const SpotifyArtistArraySchema = {
+    $id: "spotify-artist-array.json",
+    $schema: "http://json-schema.org/draft-07/schema",
+    title: "SpotifyArtistArray",
+    type: "array",
+    items: {
+        $ref: "spotify-artist.json"
+    }
+} as const satisfies JSONSchema;
+
+export type SpotifyArtistArray = FromSchema<typeof SpotifyArtistArraySchema, {references: [typeof SpotifyArtistObjectSchema]}>;
+
+let isSpotifyArtistArray = compile(SpotifyArtistArraySchema);
+
+const SpotifyTrackObjectSchema = {
+    $id: "spotify-track.json",
+    $schema: "http://json-schema.org/draft-07/schema",
+    title: "SpotifyTrackObject",
+    type: "object",
+    required: ["popularity", "name"],
+    properties: {
+        album: {
+            $ref: "spotify-album.json"
+        },
+        artists: {
+            type: "array",
+            items: {
+                $ref: "spotify-artist.json"
+            }
+        },
+        "available_markets": {
+            type: "array",
+            items: {
+                type: "string"
+            }
+        },
+        explicit: {type: "boolean"},
+        "external_ids": {
+            type: "object",
+            properties: {
+                isrc: {type: "string"},
+                ean: {type: "string"},
+                upc: {type: "string"}
+            }
+        },
+        "external_urls": {
+            type: "object",
+            properties: {
+                spotify: {type: "string"}
+            }
+        },
+        href: {type: "string"},
+        id: {type: "string"},
+        name: {type: "string"},
+        popularity: {type: "number"},
+        type: {type: "string"},
+        uri: {type: "string"},
+    },
+    additionalProperties: true
+} as const satisfies JSONSchema;
+
+export type SpotifyTrackObject = FromSchema<typeof SpotifyTrackObjectSchema, {references: [typeof SpotifyAlbumObjectSchema, typeof SpotifyArtistObjectSchema, typeof SpotifyImgObjectSchema]}>;
+
+let isSpotifyTrackObject = compile(SpotifyTrackObjectSchema);
 
 const SpotifySearchResponseSchema = {
     $id: "search-response.json",
@@ -145,7 +333,15 @@ export class OpenAIModel {
 
     createGenreList(prompt: string): Promise<GenreList>{
         const request = this.createCompletionRequest(prompt);
-        return typedFetch(this.url, isGenreList, request);
+        return typedFetch(this.url, isOpenAIResponse, request)
+        .then((response) => {
+            const genres = response.choices[0].message?.content;
+            if(isGenreList(genres)){
+                return genres;
+            } else {
+                return [];
+            }
+        });
     }
 
 
@@ -160,6 +356,7 @@ export class SpotifyModel {
     private accessKey: string;
     private timestamp: Date;
 
+    /*
     constructor(clientID: string, clientSecret: string, url: string) {
 
         this.generateAccessKey(clientID, clientSecret).then((access_key) => {
@@ -170,6 +367,11 @@ export class SpotifyModel {
             this.timestamp = new Date();
         });
 
+    }*/
+
+    constructor(accessKey: string, url: string) {
+        this.accessKey = accessKey;
+        this.url = url;
     }
 
     
@@ -203,6 +405,58 @@ export class SpotifyModel {
         return typedFetch(url, isSpotifySearchResponse, request);
     }
 
+    reSearch(url: string): Promise<SpotifySearchResponse> {
+        let request = {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${this.accessKey}`
+            }
+        }
+        return typedFetch(url, isSpotifySearchResponse, request);
+    }
+
+    selectTracks(results: SpotifySearchResponse, tracks: number, popularity: number, explicit: boolean): Array<SongData> {
+        let items = results.items;
+        const total = results.total;
+        var popHigh: number;
+        var popLow: number;
+        if (popularity == 1) {
+            popLow = 80;
+            popHigh = 100;
+        } else if (popularity == 2) {
+            popHigh = 79;
+            popLow = 20;
+        } else {
+            popHigh = 19;
+            popLow = 0;
+        }
+
+        let songs = new Array<SongData>();
+
+        let counter = 0;
+        let songsSeen = 0;
+
+        while(counter < tracks && songsSeen < total) {
+            items.forEach((item) => {
+                if (!isSpotifyTrackObject(item)) {
+                    throw new Error("Invalid Spotify Response, not a valid track object");
+                }
+                
+                const pop = item.popularity;
+                const ex = item.explicit;
+                if(pop && pop >= popLow && pop <= popHigh && ex == explicit) {
+                    const song = {
+                        title: item.name,
+                        artist: item.artists
+                    }
+                }
+            })
+        }
+
+
+        return [];
+    }
+
     searchGenreAndArtist(genre: string, artist: string): Promise<SpotifySearchResponse> {
         let url = this.url + `/search?q=genre:${genre} artist:${artist}&type=track`;
         let request = {
@@ -217,6 +471,11 @@ export class SpotifyModel {
 
 }
 
-export function initSpotifyModel(clientID: string, clientSecret: string, url: string): SpotifyModel {
+/*
+export function initSpotifyModelGenerate(clientID: string, clientSecret: string, url: string): SpotifyModel {
     return new SpotifyModel(clientID, clientSecret, url);
+}*/
+
+export function initSpotifyModel(accessKey: string, url: string): SpotifyModel {
+    return new SpotifyModel(accessKey, url);
 }
