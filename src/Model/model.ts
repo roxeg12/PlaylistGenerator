@@ -13,10 +13,16 @@ interface Request {
     body?: string;
 }
 
+interface TrackImage {
+    url: string;
+    height: number;
+    width: number;
+}
+
 interface SongData {
     title: string;
-    artist: string;
-    imgLink: string;
+    artists: string[];
+    img: TrackImage;
 }
 
 const ajv = new Ajv();
@@ -102,6 +108,7 @@ const SpotifyImgObjectSchema = {
     $schema: "http://json-schema.org/draft-07/schema",
     title: "SpotifyImgObject",
     required: ["url", "height", "width"],
+    type: "object",
     properties: {
         url: {type: "string"},
         height: {type: "number"},
@@ -114,10 +121,10 @@ export type SpotifyImgObject = FromSchema<typeof SpotifyImgObjectSchema>;
 
 let isSpotifyImgObject = compile(SpotifyImgObjectSchema);
 
-const SpotifyArtistObjectSchema = {
-    $id: "spotify-artist.json",
+const SpotifySimpleArtistObjectSchema = {
+    $id: "spotify-artist-simple.json",
     $schema: "http://json-schema.org/draft=07/schema",
-    title: "SpotifyArtistObject",
+    title: "SpotifySimpleArtistObject",
     type: "object",
     required: ["id", "name", "type", "uri"],
     properties: {
@@ -125,6 +132,30 @@ const SpotifyArtistObjectSchema = {
         name: {type: "string"},
         type: {type: "string"},
         uri: {type: "string"},
+    },
+    additionalProperties: true
+} as const satisfies JSONSchema;
+
+export type SpotifySimpleArtistObject = FromSchema<typeof SpotifySimpleArtistObjectSchema>;
+
+let isSpotifySimpleArtistObject = compile(SpotifySimpleArtistObjectSchema);
+
+const SpotifyArtistObjectSchema = {
+    $id: "spotify-artist.json",
+    $schema: "http://json-schema.org/draft-07/schema",
+    title: "SpotifyArtistObject",
+    type: "object",
+    required: ["genres", "href", "id", "name"],
+    properties: {
+        genres: {
+            type: "array",
+            items: {
+                type: "string"
+            }
+        },
+        href: {type: "string"},
+        id: {type: "string"},
+        name: {type: "string"}
     },
     additionalProperties: true
 } as const satisfies JSONSchema;
@@ -163,13 +194,13 @@ const SpotifyAlbumObjectSchema = {
         artists: {
             type: "array",
             items: {
-                $ref: "spotify-artist.json"
+                $ref: "spotify-artist-simple.json"
             }
         }
     }
 } as const satisfies JSONSchema;
 
-export type SpotifyAlbumObject = FromSchema<typeof SpotifyAlbumObjectSchema, {references: [typeof SpotifyImgObjectSchema, typeof SpotifyArtistObjectSchema]}>;
+export type SpotifyAlbumObject = FromSchema<typeof SpotifyAlbumObjectSchema, {references: [typeof SpotifyImgObjectSchema, typeof SpotifySimpleArtistObjectSchema]}>;
 
 let isSpotifyAlbumObject = compile(SpotifyAlbumObjectSchema);
 
@@ -179,11 +210,11 @@ const SpotifyArtistArraySchema = {
     title: "SpotifyArtistArray",
     type: "array",
     items: {
-        $ref: "spotify-artist.json"
+        $ref: "spotify-artist-simple.json"
     }
 } as const satisfies JSONSchema;
 
-export type SpotifyArtistArray = FromSchema<typeof SpotifyArtistArraySchema, {references: [typeof SpotifyArtistObjectSchema]}>;
+export type SpotifyArtistArray = FromSchema<typeof SpotifyArtistArraySchema, {references: [typeof SpotifySimpleArtistObjectSchema]}>;
 
 let isSpotifyArtistArray = compile(SpotifyArtistArraySchema);
 
@@ -192,7 +223,7 @@ const SpotifyTrackObjectSchema = {
     $schema: "http://json-schema.org/draft-07/schema",
     title: "SpotifyTrackObject",
     type: "object",
-    required: ["popularity", "name"],
+    required: ["popularity", "name", "explicit"],
     properties: {
         album: {
             $ref: "spotify-album.json"
@@ -200,7 +231,7 @@ const SpotifyTrackObjectSchema = {
         artists: {
             type: "array",
             items: {
-                $ref: "spotify-artist.json"
+                $ref: "spotify-artist-simple.json"
             }
         },
         "available_markets": {
@@ -234,7 +265,7 @@ const SpotifyTrackObjectSchema = {
     additionalProperties: true
 } as const satisfies JSONSchema;
 
-export type SpotifyTrackObject = FromSchema<typeof SpotifyTrackObjectSchema, {references: [typeof SpotifyAlbumObjectSchema, typeof SpotifyArtistObjectSchema, typeof SpotifyImgObjectSchema]}>;
+export type SpotifyTrackObject = FromSchema<typeof SpotifyTrackObjectSchema, {references: [typeof SpotifyAlbumObjectSchema, typeof SpotifySimpleArtistObjectSchema, typeof SpotifyImgObjectSchema]}>;
 
 let isSpotifyTrackObject = compile(SpotifyTrackObjectSchema);
 
@@ -415,21 +446,41 @@ export class SpotifyModel {
         return typedFetch(url, isSpotifySearchResponse, request);
     }
 
+    getArtist(artist: string):Promise<SpotifyArtistObject> {
+        const url = `search?q=artist:${artist}&type=artist`;
+        return this.reSearch(url)
+        .then((search: SpotifySearchResponse) => {
+            if(search.total < 1) {
+                throw new Error("No artist of that name found");
+            }
+            const firstArtist = search.items[0];
+            if (isSpotifyArtistObject(firstArtist)) {
+                return firstArtist;
+            }
+            throw new Error("Invalid artist type found");
+        }).catch((error) => {
+            throw error;
+        });
+    }
+
+    getGenresFromArtist(artist: SpotifyArtistObject): Array<string> {
+        return artist.genres;
+    }
+
+    getArtistGenres(artist: string):Promise<Array<string>> {
+       return this.getArtist(artist)
+       .then((artistObj: SpotifyArtistObject) => {
+            return artistObj.genres;
+       }).catch((error) => {
+        throw error;
+       });
+    }
+
+    /*
     selectTracks(results: SpotifySearchResponse, tracks: number, popularity: number, explicit: boolean): Array<SongData> {
         let items = results.items;
         const total = results.total;
-        var popHigh: number;
-        var popLow: number;
-        if (popularity == 1) {
-            popLow = 80;
-            popHigh = 100;
-        } else if (popularity == 2) {
-            popHigh = 79;
-            popLow = 20;
-        } else {
-            popHigh = 19;
-            popLow = 0;
-        }
+
 
         let songs = new Array<SongData>();
 
@@ -455,7 +506,7 @@ export class SpotifyModel {
 
 
         return [];
-    }
+    }*/
 
     searchGenreAndArtist(genre: string, artist: string): Promise<SpotifySearchResponse> {
         let url = this.url + `/search?q=genre:${genre} artist:${artist}&type=track`;
@@ -466,6 +517,181 @@ export class SpotifyModel {
             }
         }
         return typedFetch(url, isSpotifySearchResponse, request);
+    }
+
+    getTrackFromSearch(search: SpotifySearchResponse, idx: number):SpotifyTrackObject | undefined {
+        const numPage = search.limit;
+        
+        if (idx < numPage) {
+            const track = search.items[idx];
+            if(isSpotifyTrackObject(track)){
+                return track;
+            } else {
+                throw new Error("Did not find a valid track object");
+            }
+        }  else {
+            let offset = 1;
+            while(idx > numPage) {
+                offset++;
+                idx -= numPage;
+            }
+            let oldUrl = search.href;
+            oldUrl.replace("offset=0", `offset=${offset}`);
+            let newSearch = this.reSearch(oldUrl)
+            .then((response: SpotifySearchResponse) => {
+                const track = search.items[idx];
+                if (isSpotifyTrackObject(track)) {
+                    return track;
+                } else {
+                    throw new Error("Did not find a valid track object");
+                }
+            }).catch((error) => {
+                return error;
+            });
+        }
+    }
+
+    private getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+      }
+
+    getRandomSongFromGenre(genre: string, explicit: boolean, popularity: number): Promise<SongData> {
+        return this.searchGenre(genre)
+        .then((songs: SpotifySearchResponse) => {
+            return this.getRandomSongFromSearch(songs, explicit, popularity);
+        });
+    }
+
+    getRandomSongFromSearch(songs: SpotifySearchResponse, explicit: boolean, popularity: number): SongData {
+        let seenSongs = new Map<string, number>();
+        
+        
+        const numSongs = songs.total;
+        const chosenSong = this.getRandomInt(numSongs);
+        const track = this.getTrackFromSearch(songs, chosenSong);
+        if (!track) {
+            throw new Error("No track found?");
+        }
+
+        var popHigh: number;
+        var popLow: number;
+        if (popularity == 1) {
+            popLow = 80;
+            popHigh = 100;
+        } else if (popularity == 2) {
+            popHigh = 79;
+            popLow = 20;
+        } else {
+            popHigh = 19;
+            popLow = 0;
+        }
+
+        let title: string;
+        let img: SpotifyImgObject;
+        let artists: Array<string>;
+        let pop: number;
+        let ex: boolean;
+
+        let song: SongData = {
+            title: "",
+            artists: [],
+            img: {
+                url: "",
+                height: 0,
+                width: 0
+            }
+        }
+
+        do {
+            const chosenSong = this.getRandomInt(numSongs);
+            const track = this.getTrackFromSearch(songs, chosenSong);
+            if (!track) {
+                throw new Error("No track found?");
+            }
+    
+            pop = track.popularity;
+            ex = track.explicit;
+            title = track.name;
+            img = this.getImgFromTrack(track);
+            artists = this.getArtistFromTrack(track);
+            song = {
+                title: title,
+                artists: artists,
+                img: img
+            } as SongData;
+            let numSeen = seenSongs.get(title);
+            if (numSeen) {
+                seenSongs.set(title, numSeen++);
+                if (numSeen >= 5) {
+                    throw new Error("Too few acceptable tracks, revisited song 5 times");
+                }
+            } else {
+                seenSongs.set(title, 1);
+            }
+        } while (!(pop && pop >= popLow && pop <= popHigh && ex == explicit));
+
+        return song;
+    }
+
+    getNRandomSongsFromSearch(search: SpotifySearchResponse, numSongs: number, explicit: boolean, popularity: number): Array<SongData> {
+        if(search.total > numSongs) {
+            throw new Error(`Cannot get ${numSongs} from search, only has ${search.total} items`);
+        }
+
+
+        let songs = new Map<string, SongData>();
+        let newSongs =  new Array<SongData>();
+        while(songs.keys.length < numSongs) {
+            const song = this.getRandomSongFromSearch(search, explicit, popularity);
+            if (!(songs.get(song.title))) {
+                {
+                    songs.set(song.title, song);
+                    newSongs.push(song);
+                }
+
+            }
+        }
+        return newSongs;
+    }
+
+    getRandomSongFromArtistGenre(genre: string, artist: string, explicit: boolean, popularity: number) {
+        return this.searchGenreAndArtist(genre, artist)
+        .then((songs: SpotifySearchResponse) => {
+            return this.getRandomSongFromSearch(songs, explicit, popularity);
+        })
+    }
+
+    getImgFromTrack(track: SpotifyTrackObject): SpotifyImgObject {
+        const album = track.album;
+        if (album) {
+            const imgs = album.images;
+            if (imgs) {
+                imgs.forEach((img: SpotifyImgObject) => {
+                    if (img.height == 300 && img.width == 300) {
+                        return img;
+                    }
+                });
+                return imgs[0];
+            }
+        }
+        const emptyImg = {
+            url: "empty",
+            width: 0,
+            height: 0
+        };
+        return emptyImg;
+    }
+
+    getArtistFromTrack(track: SpotifyTrackObject): Array<string> {
+        const artists = track.artists;
+        if (!artists) {
+            throw new Error("No artist data found for this track");
+        }
+        let artistNames = new Array<string>();
+        artists.forEach((artistObj: SpotifySimpleArtistObject) => {
+            artistNames.push(artistObj.name);
+        });
+        return artistNames;
     }
 
 
