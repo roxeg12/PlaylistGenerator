@@ -1,3 +1,15 @@
+interface TrackImage {
+    url: string;
+    height: number;
+    width: number;
+}
+
+interface SongData {
+    title: string;
+    artists: string[];
+    img: TrackImage;
+}
+
 function getTemplate1(id: string): HTMLTemplateElement {
     const template = document.querySelector(`#${id}-template`);
     if (!(template instanceof HTMLTemplateElement)) {
@@ -122,11 +134,11 @@ export class SongItem extends HTMLElement {
     private artistName: string;
     private imgLink: string;
 
-    constructor(songName: string, artist: string, img: string) {
+    constructor(songName: string, artists: string[], img: TrackImage) {
         super();
         this.songName = songName;
-        this.artistName = artist;
-        this.imgLink = img;
+        //this.artistName = artist;
+        this.imgLink = img.url;
 
         this.append(SongItem.template.content.cloneNode(true));
 
@@ -143,9 +155,15 @@ export class SongItem extends HTMLElement {
             throw new Error("Artist paragraph element does not exist in SongItem template");
         }
 
-        imgElem.src = img;
+        imgElem.src = this.imgLink;
         titleElem.innerText = songName;
-        artistElem.innerText = artist;
+        
+        artistElem.innerText = artists[0];
+        if (artists.length > 1) {
+            artists.slice(1, artists.length).forEach((artist: string) => {
+                artistElem.innerText += `, ${artist}`;
+            });
+        }
 
     }
 
@@ -167,9 +185,15 @@ export function initComponents() {
 
     Question.initialize();
 
+    SongItem.initialize("song-item");
+
+
+
     customElements.define("pre-quiz", PreQuiz);
 
     customElements.define("quiz-question", Question);
+
+    customElements.define("song-item", SongItem);
 }
 
 /**

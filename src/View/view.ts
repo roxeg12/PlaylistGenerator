@@ -26,10 +26,16 @@ interface submitQuizEventDetail {
     answers: Map<string, string> // the quiz answers
 }
 
+interface TrackImage {
+    url: string;
+    height: number;
+    width: number;
+}
+
 interface SongData {
     title: string;
-    artist: string;
-    imgLink: string;
+    artists: string[];
+    img: TrackImage;
 }
 
 /**
@@ -157,7 +163,12 @@ export class PreQuizView {
         var answer = "";
         if(this.currQ.type == "mc") {
             console.log("type mc");
-            answer = answerBtn.innerText;
+            const dataAnswer = answerBtn.getAttribute("data-answer");
+            if(!dataAnswer) {
+                throw new Error(`No data-answer attribute on button ${answerBtn} on question ${this.currQ.id}`);
+            }
+            //answer = answerBtn.innerText;
+            answer = dataAnswer;
         } else if (this.currQ.type == "cb"){
             var checkedBoxes = document.querySelectorAll('input[type=checkbox]:checked');
             checkedBoxes.forEach((checkbox) => {
@@ -174,7 +185,11 @@ export class PreQuizView {
             if (!(input instanceof HTMLElement)) {
                 throw new Error("Input does not exist for open ended question");
             }
-            answer = input.value;
+            /*
+            input.forEach((inputBox: HTMLInputElement) => {
+                answer += `${inputBox.value} `;
+            })*/
+           answer = input.value;
         }
         console.log("qID:", qID);
         console.log("answer:", answer);
@@ -260,20 +275,58 @@ export class PreQuizView {
 
 export class PlaylistView {
     private PlaylistSection: HTMLElement; // a section element
-    private songList: Array<SongData>;
+    private songList: Array<Promise<SongData>>;
+    private title: HTMLHeadingElement;
 
-    constructor(playlistSection: HTMLElement, songList: Array<SongData>) {
+    constructor(playlistSection: HTMLElement, songList: Array<Promise<SongData>>) {
         this.PlaylistSection = playlistSection;
+        this.PlaylistSection.id = "playlist-section";
+        this.title = document.createElement("h2");
+        this.title.id = "playlist-name";
+        this.PlaylistSection.appendChild(this.title);
         this.songList = songList;
     }
 
-    displayPlaylist() {
-        this.songList.forEach((song: SongData) => {
-            const songElem = new SongItem(song.title, song.artist, song.imgLink);
-            this.PlaylistSection.appendChild(songElem);
-        });
+    setTitle(title: string) {
+        this.title.innerText = title;
     }
 
-    
+    async createPlaylist() {
+        console.log("createPlaylist called in PlaylistView");
+        this.songList.forEach(async (songP: Promise<SongData>) => {
+            /*songP.then((song) => {
+                const songElem = new SongItem(song.title, song.artists, song.img);
+                this.PlaylistSection.appendChild(songElem);
+            }).catch((error) => {
+                console.log(error);
+            });*/
+            try {
+                let song = await songP;
+                const songElem = new SongItem(song.title, song.artists, song.img);
+                this.PlaylistSection.appendChild(songElem);
+            } catch (error){
+                console.log(error);
+            }
+
+        });
+        //document.dispatchEvent(new CustomEvent("completePlaylistEvent"));
+    }
+}
+
+export class LoadingView {
+    private section: HTMLElement;
+    private text: HTMLHeadingElement;
+
+    constructor(loadingSection: HTMLElement) {
+        this.section = loadingSection;
+        this.section.id = "loading-page";
+        const h3 = document.createElement("h3");
+        h3.innerText = "Your playist is generating...";
+        this.section.appendChild(h3);
+    }
+
+    displayLoadingPage() {
+
+    }
 }
 

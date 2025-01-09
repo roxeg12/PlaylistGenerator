@@ -172,6 +172,45 @@ quiz-question ul {
     cursor: pointer;
 }
 
+#playlist-section {
+    height: 100%;
+    width: 100%;
+    background-color: rgba(198, 213, 216, 0.893);
+    display: flex;
+    flex-direction: column;
+}
+
+song-item {
+    flex: 1;
+    min-width: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 20px;
+    background: none;
+    border: black solid 2px;
+}
+
+song-item img {
+    max-width: 50px;
+    max-height: 50px;
+    margin: 10px;
+}
+
+song-item p {
+
+    color: black;
+}
+
+song-item .song-title {
+    font-size: 20px;
+}
+
+song-item .artist-name {
+    font-size: 10px;
+}
+
+
 
 footer {
     display: flex;

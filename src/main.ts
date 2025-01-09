@@ -84,30 +84,28 @@ const PreQuizQuesions = new Array<QuestionData>(
         question: "Age rating?", 
         type: "mc", 
         answerChoices: `<ul>
-                <li><button>Keep it clean</button></li>
-                <li><button>We can get explicit</button></li>
+                <li><button data-answer="clean">Keep it clean</button></li>
+                <li><button data-answer="explicit">We can get explicit</button></li>
                 </ul>`
     },
+    /*
     {
         id: "popularity",
         question: "How cultured should this be?",
         type: "mc",
         answerChoices: `<ul>
-                <li><button>Top hits only</button></li>
-                <li><button>As niche as you can make it</button></li>
-                <li><button>Somewhere in the middle</button></li>
-                <li><button>Any!</button></li>
+                <li><button data-answer="1">Top hits only</button></li>
+                <li><button data-answer="3">As niche as you can make it</button></li>
+                <li><button data-answer="2">Somewhere in the middle</button></li>
+                <li><button data-answer="4">Any!</button></li>
                 </ul>`
-    },
+    },*/
     {
         id: "playlist-length",
         question: "How long should the playlist be?",
         type: "oe",
-        answerChoices: `<input type="text" id="playlist-length">
-            <select id="length-unit-select">
-                <option value="minutes">Minutes</option>
-                <option value="songs">Songs</option>
-            </select>
+        answerChoices: `<input type="text" name="playlist-length" id="playlist-length">
+            <label for="playlist-length"> songs</label>
             <button>Submit</button>`
     },
     {
@@ -116,9 +114,7 @@ const PreQuizQuesions = new Array<QuestionData>(
         type: "mc",
         answerChoices: `
                 <ul>
-                    <li><button>Mini</button></li>
-                    <li><button>Regular</button></li>
-                    <li><button>Long</button></li>
+                    <li><button data-answer="Mini">Mini</button></li>
                 </ul>
             `
     }
@@ -222,7 +218,7 @@ function main(): void {
     const spotifyClientId = process.env.SPOTIFY_CLIENT_ID;
     const spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET;
     const spotifyAccessKey = process.env.SPOTIFY_ACCESS_KEY;
-    const SpotifyUrl = `https://api.spotify.com/v1`;
+    const SpotifyUrl = `https://api.spotify.com/`;
 
     const openAImodel = initOpenAiModel(openAIkey, openAIUrl);
     const spotifyModel = initSpotifyModel(spotifyAccessKey, SpotifyUrl);
