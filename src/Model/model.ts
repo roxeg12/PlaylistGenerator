@@ -537,7 +537,7 @@ export class SpotifyModel {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${this.accessKey}`
-                //Authorization: "Bearer BQB2CsxlHkVAFb1Ve99RaM-vSA3OiHCh6ZTbo1vN3rIJwOXovBfG9Cm_RFZWtP69nqiDkZzYPtj5AlUnr0zxZChB0Gbo50ANGMXfQTAubc8q3HZafyQ"
+                
             }
         }
         return typedFetch(url, validate, request);
@@ -549,7 +549,7 @@ export class SpotifyModel {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${this.accessKey}`
-                //Authorization: "Bearer BQB2CsxlHkVAFb1Ve99RaM-vSA3OiHCh6ZTbo1vN3rIJwOXovBfG9Cm_RFZWtP69nqiDkZzYPtj5AlUnr0zxZChB0Gbo50ANGMXfQTAubc8q3HZafyQ" // 4:03 pm
+                
             }
         }
         const newUrl = this.url + url;
