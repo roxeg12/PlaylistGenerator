@@ -91,6 +91,10 @@
 </ul>
 <p>Currently to run this code, complete the following steps:</p>
 <ol>
-  <li>Create a .env</li>
+  <li>Use the Spotify API and the client ID and client secret codes to generate a Spotify Access Key</li>
+  <li>Fill in the provided .env file with the appropriate access keys</li>
+  <li>Run <code>npm init</code> in the terminal</li>
+  <li>Ensure that node is set up correctly, then run <code>npm start</code></li>
+  <li>Follow the provided local link and fill out the quiz!</li>
 </ol>
 
