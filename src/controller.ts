@@ -1,6 +1,6 @@
 import { Question } from "./components";
 import { OpenAIModel, SpotifyModel } from "./Model/model";
-import { LoadingView, PlaylistView } from "./View/view";
+import { PlaylistView } from "./View/view";
 
 /**
  * A generic interface that represents an Answers map returned
@@ -10,12 +10,18 @@ interface QuizAnswers {
     [x: string]: string;
 }
 
+/**
+ * Identifies the unique set of data associated with a song's album image
+ */
 interface TrackImage {
     url: string;
     height: number;
     width: number;
 }
 
+/**
+ * Identifies the unique set of data associated with any one song
+ */
 interface SongData {
     title: string;
     artists: string[];
@@ -32,6 +38,9 @@ interface MiniQuizAnswers extends QuizAnswers{
     "dissimilar-song": string;
 }
 
+/**
+ * Identifies a response from the Spotify API's search endpoint
+ */
 interface SpotifyResponse {
     href: string;
     limit: number;

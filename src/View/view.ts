@@ -26,12 +26,18 @@ interface submitQuizEventDetail {
     answers: Map<string, string> // the quiz answers
 }
 
+/**
+ * Identifies the unique set of data associated with a song's album image
+ */
 interface TrackImage {
     url: string;
     height: number;
     width: number;
 }
 
+/**
+ * Identifies the unique set of data associated with any one song
+ */
 interface SongData {
     title: string;
     artists: string[];
@@ -39,7 +45,7 @@ interface SongData {
 }
 
 /**
- * The View class that handles all quiz functionality, including switching out questions,
+ * The PreQuizView class handles all quiz functionality, including switching out questions,
  * (displaying a new question or redisplaying an old one), saving user input, and sending a submission
  * event when the user has completed the specified questions
  */
@@ -175,12 +181,16 @@ export class PreQuizView {
             answer = dataAnswer;
         } else if (this.currQ.type == "cb"){
             // Checkboxes
+
+            // Remove error message when user makes selection
             this.answerArea.addEventListener("click", (ev: MouseEvent) => {
                 if(ev.target instanceof HTMLInputElement) {
                     this.removeErrorMessage();
                 }
             })
             var checkedBoxes = document.querySelectorAll('input[type=checkbox]:checked');
+
+            // Check user selected at least one answer
             if(checkedBoxes.length == 0) {
                 this.displayErrorMessage("Choose at least one option.");
             }
@@ -204,20 +214,21 @@ export class PreQuizView {
                 answer += `${inputBox.value} `;
             })*/
 
-
+            // Remove error message when user begins typing
             input.addEventListener("keypress", () => {
                 this.removeErrorMessage();
             });
            
+            // Check the user typed an answer
             if (input.value == "") {
-
-                this.displayErrorMessage("Enter an answer.");
-                
+                this.displayErrorMessage("Enter an answer."); 
             } else {
                 answer = input.value;
             }
            
         }
+
+        // Store answer, display next question in quiz
         if(answer) {
             console.log("qID:", qID);
             console.log("answer:", answer);
@@ -236,18 +247,13 @@ export class PreQuizView {
                 this.question.innerText = this.currQ.question;
                 this.answerArea.innerHTML = this.currQ.answerChoices;
             } else {
-                /*
-                this.question.innerText = "Answers:";
-                for (let entry of this.Answers.entries()) {
-                    this.answerArea.innerHTML= this.answerArea.innerText + `question: ${entry[0]}, answer: ${entry[1]}\n`
-                }*/
-            if (this.type == "prequiz") {
+                // When the user reaches the end of this set of questions, sends the 
+                // correct submission event.
+                if (this.type == "prequiz") {
                     const quizLength = this.Answers.get("quiz-length");
                     if (!(quizLength)) {
                         throw new Error("User did not answer quiz length question");
                     }
-                
-
                     const submitPrequizEvent = new CustomEvent<submitPrequizEventDetail>("submitPrequizEvent", 
                         {detail: {quizLength: quizLength, answers: this.Answers}});
 
@@ -267,6 +273,11 @@ export class PreQuizView {
         
     }
 
+    /**
+     * Displays an error message to the user. Used to give feedback and/or prompt
+     * the user to correct the error.
+     * @param err the error message to be displayed to the user
+     */
     private displayErrorMessage(err: string) {
         const question  = document.querySelector("#answer-section");
         if(!(question instanceof HTMLElement)) {
@@ -281,6 +292,10 @@ export class PreQuizView {
         }
     }
 
+    /**
+     * Removes any prior error message. Should only be called once the user
+     * corrects the error.
+     */
     private removeErrorMessage() {
         const question  = document.querySelector("#answer-section");
         const err = document.querySelector(".error-msg");
@@ -302,7 +317,6 @@ export class PreQuizView {
             this.question.innerText = this.currQ.question;
             this.answerArea.innerHTML = this.currQ.answerChoices;
         } else {
-            // show prequiz??
 
             const prequizParent = document.querySelector("main");
             if (!(prequizParent instanceof HTMLElement)) {
@@ -318,13 +332,17 @@ export class PreQuizView {
         
     }
 
+    /**
+     * @returns the current map of question IDs to answers
+     */
     getAnswers(): Map<string, string> {
         return this.Answers;
     }
-
-
 }
 
+/**
+ * The PlaylistView displays the generated playlist to the user. 
+ */
 export class PlaylistView {
     private PlaylistSection: HTMLElement; // a section element
     private songList: Array<Promise<SongData>>;
@@ -339,19 +357,22 @@ export class PlaylistView {
         this.songList = songList;
     }
 
+    /**
+     * Sets or resets the playlist title
+     * @param title the name to set the playlist title to
+     */
     setTitle(title: string) {
         this.title.innerText = title;
     }
 
+    /**
+     * Creates a SongItem element for each item in the array of SongData passed in 
+     * at construction, and adds each SongItem to the designated playlist section.
+     * This creates a visible list of the songs for the user.
+     */
     async createPlaylist() {
         console.log("createPlaylist called in PlaylistView");
         this.songList.forEach(async (songP: Promise<SongData>) => {
-            /*songP.then((song) => {
-                const songElem = new SongItem(song.title, song.artists, song.img);
-                this.PlaylistSection.appendChild(songElem);
-            }).catch((error) => {
-                console.log(error);
-            });*/
             try {
                 let song = await songP;
                 const songElem = new SongItem(song.title, song.artists, song.img);
@@ -359,12 +380,11 @@ export class PlaylistView {
             } catch (error){
                 console.log(error);
             }
-
         });
-        //document.dispatchEvent(new CustomEvent("completePlaylistEvent"));
     }
 }
 
+/*
 export class LoadingView {
     private section: HTMLElement;
     private text: HTMLHeadingElement;
@@ -381,4 +401,4 @@ export class LoadingView {
 
     }
 }
-
+*/

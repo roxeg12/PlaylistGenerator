@@ -1,15 +1,26 @@
+/**
+ * Identifies the unique set of data associated with a song's album image
+ */
 interface TrackImage {
     url: string;
     height: number;
     width: number;
 }
 
+/**
+ * Identifies the unique set of data associated with any one song
+ */
 interface SongData {
     title: string;
     artists: string[];
     img: TrackImage;
 }
 
+/**
+ * Gets a prewritten template for a specified component
+ * @param id the id of the component the template is for
+ * @returns an HTMLTemplateElement that provides the structure for this component
+ */
 function getTemplate1(id: string): HTMLTemplateElement {
     const template = document.querySelector(`#${id}-template`);
     if (!(template instanceof HTMLTemplateElement)) {
@@ -58,10 +69,7 @@ export class Question extends HTMLElement {
     }
 
     private controller: AbortController | null = null;
-
-
-
-    private backBtn: HTMLButtonElement | null = null;
+    private backBtn: HTMLButtonElement | null = null; 
     private nextBtn: HTMLButtonElement;
 
     private question: string;
@@ -71,31 +79,8 @@ export class Question extends HTMLElement {
     constructor() {
         super();
 
-
         const clone = Question.template.content.cloneNode(true);
         this.append(clone);
-
-        /*
-        const backBtn = this.querySelector(".back-btn");
-        if(!(backBtn instanceof HTMLButtonElement)) {
-            this.backBtn = null;
-        } else {
-            this.backBtn = backBtn;
-        }
-
-        const nextBtn = this.querySelector(".next-btn");
-        if(!(nextBtn instanceof HTMLButtonElement)) {
-            throw new Error("Question template incomplete: missing next button");
-        }
-        this.nextBtn = nextBtn;
-
-        const question = this.querySelector("h3");
-        if(!(question instanceof HTMLElement)) {
-            throw new Error("Missing h3 element containing question");
-        }
-        this.question = question.innerText;
-        */
-
     }
 
     connectedCallback() {
@@ -121,6 +106,11 @@ export class Question extends HTMLElement {
 
 }
 
+/**
+ * A custom component that has the necessary template of a song item.
+ * This component displays song information such as song title, artist, and 
+ * album image to the user.
+ */
 export class SongItem extends HTMLElement {
     private static template: HTMLTemplateElement;
 
@@ -130,14 +120,13 @@ export class SongItem extends HTMLElement {
 
     private controller: AbortController | null = null;
 
-    private songName: string;
-    private artistName: string;
-    private imgLink: string;
+    private songName: string; // the title of the song
+    private artistName: string; // the name of the song's artist(s)
+    private imgLink: string; // the link to the song's album image
 
     constructor(songName: string, artists: string[], img: TrackImage) {
         super();
         this.songName = songName;
-        //this.artistName = artist;
         this.imgLink = img.url;
 
         this.append(SongItem.template.content.cloneNode(true));
