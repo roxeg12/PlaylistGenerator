@@ -86,6 +86,7 @@ export class PreQuizView {
      * by the user.
      */
     startQuiz() {
+        // Find and remove prequiz
         const prequizSection = document.querySelector("pre-quiz");
         if(!(prequizSection instanceof HTMLElement)) {
             throw new Error("Prequiz start section does not exist");
@@ -97,7 +98,7 @@ export class PreQuizView {
         }
         prequizParent.removeChild(prequizSection);
 
-
+        // Begin questions
         this.currQ = this.Questions[0];
         console.log(JSON.stringify(this.currQ));
         this.countQ = 0;
@@ -161,7 +162,10 @@ export class PreQuizView {
         console.log("nextQuestion called");
         const qID = this.currQ.id;
         var answer = "";
+
+        // Check for question type, deal with appropriately
         if(this.currQ.type == "mc") {
+            // Multiple choice
             console.log("type mc");
             const dataAnswer = answerBtn.getAttribute("data-answer");
             if(!dataAnswer) {
@@ -170,7 +174,16 @@ export class PreQuizView {
             //answer = answerBtn.innerText;
             answer = dataAnswer;
         } else if (this.currQ.type == "cb"){
+            // Checkboxes
+            this.answerArea.addEventListener("click", (ev: MouseEvent) => {
+                if(ev.target instanceof HTMLInputElement) {
+                    this.removeErrorMessage();
+                }
+            })
             var checkedBoxes = document.querySelectorAll('input[type=checkbox]:checked');
+            if(checkedBoxes.length == 0) {
+                this.displayErrorMessage("Choose at least one option.");
+            }
             checkedBoxes.forEach((checkbox) => {
                 if (!(checkbox instanceof HTMLInputElement)) {
                     throw new Error("Check box does not exist?");
@@ -180,6 +193,7 @@ export class PreQuizView {
             });
             
         } else{
+            // Open ended
             console.log("type oe");
             const input = this.answerArea.querySelector("input");
             if (!(input instanceof HTMLElement)) {
@@ -189,52 +203,90 @@ export class PreQuizView {
             input.forEach((inputBox: HTMLInputElement) => {
                 answer += `${inputBox.value} `;
             })*/
-           answer = input.value;
-        }
-        console.log("qID:", qID);
-        console.log("answer:", answer);
-        this.Answers.set(qID, answer);
-        console.log("set answer in map")
 
 
-        const qIdx = ++this.countQ;
-        console.log("qIdx", qIdx);
+            input.addEventListener("keypress", () => {
+                this.removeErrorMessage();
+            });
+           
+            if (input.value == "") {
 
-
-        // display next question
-        if(qIdx < this.Questions.length) {
-            this.currQ = this.Questions[qIdx];
-            console.log("currQ", JSON.stringify(this.currQ));
-            this.question.innerText = this.currQ.question;
-            this.answerArea.innerHTML = this.currQ.answerChoices;
-        } else {
-            /*
-            this.question.innerText = "Answers:";
-            for (let entry of this.Answers.entries()) {
-                this.answerArea.innerHTML= this.answerArea.innerText + `question: ${entry[0]}, answer: ${entry[1]}\n`
-            }*/
-           if (this.type == "prequiz") {
-                const quizLength = this.Answers.get("quiz-length");
-                if (!(quizLength)) {
-                    throw new Error("User did not answer quiz length question");
-                }
-            
-
-                const submitPrequizEvent = new CustomEvent<submitPrequizEventDetail>("submitPrequizEvent", 
-                    {detail: {quizLength: quizLength, answers: this.Answers}});
-
-                document.dispatchEvent(submitPrequizEvent);
-                console.log("Prequiz submission event dispatched");
+                this.displayErrorMessage("Enter an answer.");
+                
             } else {
-                console.log("nextQuestion");
-                console.log(this.Answers);
-                const submitQuizEvent = new CustomEvent<submitQuizEventDetail>("submitQuizEvent",
-                    {detail: {answers: this.Answers}}
-                );
-                document.dispatchEvent(submitQuizEvent);
-                console.log("Quiz submission event dispatched");
+                answer = input.value;
+            }
+           
+        }
+        if(answer) {
+            console.log("qID:", qID);
+            console.log("answer:", answer);
+            this.Answers.set(qID, answer);
+            console.log("set answer in map")
+
+
+            const qIdx = ++this.countQ;
+            console.log("qIdx", qIdx);
+
+
+            // display next question
+            if(qIdx < this.Questions.length) {
+                this.currQ = this.Questions[qIdx];
+                console.log("currQ", JSON.stringify(this.currQ));
+                this.question.innerText = this.currQ.question;
+                this.answerArea.innerHTML = this.currQ.answerChoices;
+            } else {
+                /*
+                this.question.innerText = "Answers:";
+                for (let entry of this.Answers.entries()) {
+                    this.answerArea.innerHTML= this.answerArea.innerText + `question: ${entry[0]}, answer: ${entry[1]}\n`
+                }*/
+            if (this.type == "prequiz") {
+                    const quizLength = this.Answers.get("quiz-length");
+                    if (!(quizLength)) {
+                        throw new Error("User did not answer quiz length question");
+                    }
+                
+
+                    const submitPrequizEvent = new CustomEvent<submitPrequizEventDetail>("submitPrequizEvent", 
+                        {detail: {quizLength: quizLength, answers: this.Answers}});
+
+                    document.dispatchEvent(submitPrequizEvent);
+                    console.log("Prequiz submission event dispatched");
+                } else {
+                    console.log("nextQuestion");
+                    console.log(this.Answers);
+                    const submitQuizEvent = new CustomEvent<submitQuizEventDetail>("submitQuizEvent",
+                        {detail: {answers: this.Answers}}
+                    );
+                    document.dispatchEvent(submitQuizEvent);
+                    console.log("Quiz submission event dispatched");
+                }
             }
         }
+        
+    }
+
+    private displayErrorMessage(err: string) {
+        const question  = document.querySelector("#answer-section");
+        if(!(question instanceof HTMLElement)) {
+            throw new Error("No Question element exists on document");
+        }
+        let errMsg = document.querySelector(".error-msg");
+        if(!errMsg) {
+            const errMsg = document.createElement("p");
+            errMsg.className = "error-msg";
+            errMsg.innerText = err;
+            question.appendChild(errMsg);
+        }
+    }
+
+    private removeErrorMessage() {
+        const question  = document.querySelector("#answer-section");
+        const err = document.querySelector(".error-msg");
+            if((question instanceof HTMLElement) && (err instanceof HTMLParagraphElement)) {
+                question.removeChild(err);
+            }
     }
 
     /**

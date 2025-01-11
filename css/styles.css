@@ -210,7 +210,11 @@ song-item .artist-name {
     font-size: 10px;
 }
 
-
+.error-msg {
+    color: red;
+    text-align: center;
+    font-size: 15px;
+}
 
 footer {
     display: flex;
