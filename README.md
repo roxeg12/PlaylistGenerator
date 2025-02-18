@@ -4,6 +4,18 @@
 <h2>Description:</h2>
 <p>A web application that builds a playlist of song recommendations based on the user's preferred vibes for the playlist. The user completes a quiz to gather information about the desired vibe of their playlist, that the application uses to search for fitting Spotify tracks to recommend. These tracks are aggregated into a playlist of the indicated length.</p>
 
+<h2>Visual Examples<h2>
+
+<h3>Start Page</h3>
+<img src="./imgs/start_page.png" alt="Starting Page of the Application">
+
+<h3>Some questions</h3>
+<img src="./imgs/playlist_length.png" alt="A question to determine the lenth of the playlist">
+<img src="./imgs/vibe_list.png" alt="A checkbox list of different vibes">
+
+<h3>A generated playlist with 4 songs</h3>
+<img src="./imgs/playlist_4.png" alt="Groove and Sway: A Soulful Lounge Journey with 4 songs">
+
 <h2>Tools:</h2>
 <ul>
   <li>
